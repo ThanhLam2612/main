@@ -1,0 +1,280 @@
+﻿@using Nhom3.Models
+@model Nhom3.Models.SanPham
+@{
+    ViewBag.Title = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var info = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Breadcrumb Start -->
+<div class="breadcrumb-area mt-30">
+    <div class="container">
+        <div class="breadcrumb">
+            <ul class="d-flex align-items-center">
+                <li>@Html.ActionLink("Trang chủ", "Index", "Home")</li>
+                <li>@Html.ActionLink("Cửa hàng", "Shop", "Product")</li>
+                <li class="active">@Html.ActionLink(Model.TenSP, "ProductDetail", "Product", new { id = Model.MaSP }, new { })</li>
+            </ul>
+        </div>
+    </div>
+    <!-- Container End -->
+</div>
+<!-- Breadcrumb End -->
+<!-- Product Thumbnail Start -->
+<div class="main-product-thumbnail ptb-100 ptb-sm-60">
+    <div class="container">
+        <div class="thumb-bg">
+            <div class="row">
+                <!-- Main Thumbnail Image Start -->
+                <div class="col-lg-5 mb-all-40">
+                    <!-- Thumbnail Large Image start -->
+                    <div class="tab-content">
+                        <div id="thumb1" class="tab-pane fade show active">
+                            <a data-fancybox="images" href="@Model.HinhAnh"><img src="@Model.HinhAnh" alt="product-view"></a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Main Thumbnail Image End -->
+                <!-- Thumbnail Description Start -->
+                <div class="col-lg-7">
+                    <div class="thubnail-desc fix">
+                        <h3 class="product-header" style="font-weight: bold; font-family: Poppins;">@Model.TenSP</h3>
+                        <p style="opacity: .8; font-weight: bold;">Danh mục : @Model.DanhMuc.TenDanhMuc</p>
+                    </div>
+                    <!-- da sua -->
+                    <div class="pro-price mtb-30">
+                        @if (ViewBag.KhuyenMai != null)
+                        {
+                            <p class="d-flex align-items-center">
+                                <span class="old-price" style="text-decoration: line-through; color: gray; margin-right: 10px;">
+                                    @string.Format(info, "{0:c0}", Model.Gia)
+                                </span>
+                                <span class="new-price" style="color:red; font-weight:bold;">
+                                    @string.Format(info, "{0:c0}", ViewBag.GiaHienThi)
+                                </span>
+                                <span class="badge badge-danger" style="margin-left:10px;">-@ViewBag.KhuyenMai.PhanTram</span>
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="d-flex align-items-center">
+                                <span class="price">@string.Format(info, "{0:c0}", Model.Gia)</span>
+                            </p>
+                        }
+                    </div>
+
+                    <p style="font-size: 1.2em; color: #666666; font-weight: bold;">Mô tả:</p>
+                    <p class="mb-20 pro-desc-details">@Model.MoTa</p>
+                    <div class="product-size mb-20 clearfix">
+                        <label style="font-weight: bold;">Kích cỡ</label>
+                        <select class="" id="modal-kichco-soluong">
+                            @foreach (var item in ViewBag.SPCT)
+                            {
+                                <option value="@item.IDCTSP">@item.KichCo.TenKichCo</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="color clearfix mb-20">
+                        <label style="font-weight: bold;">Màu</label>
+                        <input type="color" value="@Model.MaMau.Trim()" disabled />
+                    </div>
+                    <p style="font-size: 16px; font-weight: bold;">Số lượng</p>
+                    <div class="box-quantity d-flex hot-product2">
+
+                        <form action="#" style="display:flex;height:30px;">
+                            <button onmouseover="this.style.background='#e62e04'"
+                                    onmouseout="this.style.background='black'" type="button" class="qty-btn minus" style="background-color: black; color: white; border: none;">
+                                -
+                            </button>
+                            <input class="quantity mr-15" id="modal-soluong" min="1" value="1" style="border: none; background-color: white;">
+                            <button onmouseover="this.style.background='#e62e04'"
+                                    onmouseout="this.style.background='black'" type="button" class="qty-btn plus" style="margin-left: -15px; background-color: black; color: white; border: none;">
+                                +
+                            </button>
+                        </form>
+
+                        <br />
+                        <div class="pro-actions">
+                            @if (ViewBag.Exitst.SoLuong > 0)
+                            {
+                                <div class="actions-primary">
+                                    <button id="order-text" type="button" onclick="themVaoGioHang()" class="add-cart" title="" data-original-title="Thêm" style=" border: none; margin-top: 55px; margin-left: -135px; width: 310px;"> Thêm vào giỏ</button>
+                                </div>
+                            }
+                            @if (ViewBag.Exitst.SoLuong == 0)
+                            {
+                                <div class="actions-primary">
+                                    <button id="order-text" type="button" onclick="themVaoGioHang()" class="add-cart" title="" data-original-title="Thêm" disabled style="border: none; margin-top: 55px; margin-left: -135px; width: 310px;">Hết hàng! Hãy chọn kích cỡ khác</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Thumbnail Description End -->
+        </div>
+        <!-- Row End -->
+    </div>
+</div>
+<!-- Container End -->
+<!-- Product Thumbnail End -->
+<!-- Product Thumbnail Description Start -->
+@{
+    var tk = Session[Nhom3.Session.ConstaintUser.USER_SESSION] as TaiKhoanNguoiDung;
+}
+
+<div id="box-danhgia" class="mt-4" style="padding-left:20px;width:1200px;margin:auto">
+    <h3>Đánh giá sản phẩm</h3>
+
+    <!-- Thêm đánh giá (chỉ khi đăng nhập) -->
+    @if (tk != null)
+    {
+        if (TempData["Error"] != null)
+        {<div class="alert alert-warning">@TempData["Error"]</div>}
+    if (TempData["Success"] != null)
+    {<div class="alert alert-success">@TempData["Success"]</div>}
+
+<div class="card p-3 mb-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="dg-maSP" value="@Model.MaSP" />
+
+    <div class="form-group">
+        <label>Xếp hạng:</label><br />
+        <label><input type="radio" name="dg-xepHang" value="1" /> Tốt</label>
+        <label class="ml-3"><input type="radio" name="dg-xepHang" value="2" /> Trung bình</label>
+        <label class="ml-3"><input type="radio" name="dg-xepHang" value="3" /> Tệ</label>
+    </div>
+
+    <div class="form-group">
+        <label>Bình luận:</label>
+        <textarea id="dg-binhLuan" class="form-control" rows="3" maxlength="500"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Tên:</label>
+        <input type="text" class="form-control" value="@tk.HoTen" readonly />
+    </div>
+
+    <button id="btnGuiDanhGia" class="btn btn-primary">Gửi đánh giá</button>
+</div>
+}
+else
+{
+<p>Bạn cần <a href="@Url.Action("Login", "Home")">đăng nhập</a> để gửi đánh giá.</p>
+}
+
+    <hr />
+
+    <!-- Partial hiển thị danh sách đánh giá cho sản phẩm (server render) -->
+    <div id="danh-sach-danhgia">
+        @Html.Action("DanhSachTheoSP", "DanhGia", new { maSP = Model.MaSP })
+    </div>
+</div>
+
+@section Script {
+    <script>
+        $(function () {
+            $('#btnGuiDanhGia').click(function (e) {
+                e.preventDefault();
+
+                var maSP = $('#dg-maSP').val();
+                var binhLuan = $('#dg-binhLuan').val().trim();
+                var xepHang = $('input[name="dg-xepHang"]:checked').val();
+
+                if (!xepHang) {
+                    Swal.fire('Thông báo', 'Vui lòng chọn xếp hạng.', 'warning');
+                    return;
+                }
+                if (binhLuan.length === 0) {
+                    Swal.fire('Thông báo', 'Vui lòng nhập bình luận.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ThemDanhGia", "DanhGia")',
+                    type: 'POST',
+                    data: {
+                        maSP: maSP,
+                        xepHang: xepHang,
+                        binhLuan: binhLuan
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            Swal.fire({
+                                title: 'Thành công',
+                                text: res.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Lỗi',
+                                text: res.message,
+                                icon: 'error'
+                            }).then(() => {
+                                if (res.redirect) window.location = res.redirect;
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Lỗi', 'Có lỗi, thử lại.', 'error');
+                    }
+                });
+            });
+        });
+        $(document).ready(function () {
+            // lấy các phần tử
+            var input = $("#modal-soluong");
+
+            $(".qty-btn.minus").click(function () {
+                let value = parseInt(input.val()) || 1;
+                if (value > 1) {
+                    input.val(value - 1);
+                }
+            });
+
+            $(".qty-btn.plus").click(function () {
+                let value = parseInt(input.val()) || 1;
+                input.val(value + 1); // test cơ bản chưa check tồn kho
+            });
+        });
+    </script>
+}
+
+<br />
+<br />
+
+<div class="thumnail-desc pb-100 pb-sm-60">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <ul class="main-thumb-desc nav tabs-area" role="tablist">
+                    <li><a class="active" data-toggle="tab" href="#dtail">Hướng dẫn sử dụng</a></li>
+                    <li><a data-toggle="tab" href="#review">Chất liệu</a></li>
+                </ul>
+                <!-- Product Thumbnail Tab Content Start -->
+                <div class="tab-content thumb-content border-default">
+                    <div id="dtail" class="tab-pane fade show active">
+                        <p>
+                            @Model.HuongDan
+                        </p>
+                    </div>
+                    <div id="review" class="tab-pane fade">
+                        <!-- Reviews Start -->
+                        <p>@Model.ChatLieu</p>
+                        <!-- Reviews End -->
+                    </div>
+                </div>
+                <!-- Product Thumbnail Tab Content End -->
+            </div>
+        </div>
+        <!-- Row End -->
+    </div>
+    <!-- Container End -->
+</div>
+<!-- Product Thumbnail Description End -->
